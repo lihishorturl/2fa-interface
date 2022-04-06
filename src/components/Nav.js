@@ -31,7 +31,7 @@ export default function Nav({ defaultAccount }) {
               <a href="/app" className='bg-white rounded-full p-2'>
                 <span className="sr-only">Workflow</span>
                 <img
-                  className="h-8 w-auto sm:h-10"
+                  className="h-8 w-auto"
                   src="./watchdog.svg"
                   alt=""
                 />
