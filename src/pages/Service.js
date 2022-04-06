@@ -277,7 +277,7 @@ function Service() {
                   <div className="flex items-center flex-1">
                     <div className="flex items-center justify-between w-full">
                       <div className="bg-white rounded-full p-2 h-12 w-12">
-                        <img className="h-8 w-auto sm:h-10" src="./watchdog.svg" alt="" />
+                        <img className="h-8 w-auto" src="./watchdog.svg" alt="" />
                       </div>
                       <div className='float-right'>
                         <button onClick={connectWalletHandler} className={connButtonAlertClass ? "btn-3d-alert" : "btn-3d"}>
