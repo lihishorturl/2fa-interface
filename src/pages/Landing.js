@@ -165,7 +165,7 @@ export default function Landing() {
                     {/* Illustration taken from Lucid Illustrations: https://lucid.pixsellz.io/ */}
                     <img
                       className="w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
-                      src="https://tailwindui.com/img/component-images/cloud-illustration-teal-cyan.svg"
+                      src="/images/cloud-illustration-teal-cyan.svg"
                       alt=""
                     />
                   </div>
