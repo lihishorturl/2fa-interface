@@ -14,8 +14,8 @@ export default function Nav({ defaultAccount }) {
   var lastFive = ''
   var firstSix = ''
   if(defaultAccount) {
-    lastFive = defaultAccount.substr(defaultAccount.length - 5).toUpperCase();
-    firstSix = defaultAccount.substr(0, 6).toUpperCase();
+    lastFive = defaultAccount.substr(defaultAccount.length - 5);
+    firstSix = defaultAccount.substr(0, 6);
   }
 
   return (

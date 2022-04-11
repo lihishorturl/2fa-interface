@@ -60,8 +60,8 @@ function Service() {
   function onSessionUpdate(address, chainId) {
     setWalletConnected(true)
     setDefaultAccount(address)
-    const lastFive = address.substr(address.length - 5).toUpperCase();
-    const firstSix = address.substr(0, 6).toUpperCase();
+    const lastFive = address.substr(address.length - 5);
+    const firstSix = address.substr(0, 6);
     setConnButtonText(firstSix + '...' + lastFive);
   };
 
