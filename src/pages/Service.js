@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import React, { useEffect, useState } from "react";
 import Panel from '../components/Panel';
 import Steps from '../components/Steps';
+import Admin from '../components/Admin';
 import { useSearchParams } from "react-router-dom";
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import { networks } from '../constants/networks';
@@ -14,7 +15,7 @@ import withReactContent from 'sweetalert2-react-content'
 function Service() {
 
   const [searchParams] = useSearchParams();
-  
+
   const [contract, setContract] = useState(undefined);
   const [referral, setReferral] = useState('');
   const [isLogin, setIsLogin] = useState(false);
@@ -26,6 +27,7 @@ function Service() {
   const [connButtonText, setConnButtonText] = useState('Connect BSC Wallet');
   const [tokenName, setTokenName] = useState(null);
   const [chainId, setChainId] = useState(null);
+  const [ownerMode, setOwnerMode] = useState(false);
   const [connButtonAlertClass, setConnButtonAlertClass] = useState(false);
   const MySwal = withReactContent(Swal)
 
@@ -153,7 +155,7 @@ function Service() {
               56: "https://bsc-dataseed.binance.org",
               97: "https://data-seed-prebsc-1-s1.binance.org:8545",
             },
-            supportedChainIds: [56,97],
+            supportedChainIds: [56, 97],
             qrcode: true,
             network: 'binance',
             qrcodeModalOptions: {
@@ -210,7 +212,6 @@ function Service() {
           network = await provider.getNetwork()
         }
 
-        console.log(network.chainId);
         setChainId(network.chainId)
 
         if (!networks[network.chainId]) {
@@ -245,6 +246,17 @@ function Service() {
 
         setContract(uni2fa);
         setWalletConnected(true)
+        const owner = await uni2fa.owner();
+
+        const minted = await uni2fa.getMintedNumber()
+        if (minted) {
+          setMinted(true)
+        }
+
+        console.log(owner, signerAddress)
+        if (owner === signerAddress) {
+          setOwnerMode(true)
+        }
       } catch (error) {
         let message = error.message
         if (error.message === 'Already processing eth_requestAccounts. Please wait.') message = 'Already requested, please unlock your wallet.'
@@ -276,14 +288,23 @@ function Service() {
                 <div className="pt-6">
                   <div className="flex items-center flex-1">
                     <div className="flex items-center justify-between w-full">
-                      <div className="bg-white rounded-full p-2 h-12 w-12">
-                        <img className="h-8 w-auto" src="./watchdog.svg" alt="" />
-                      </div>
-                      <div className='float-right'>
-                        <button onClick={connectWalletHandler} className={connButtonAlertClass ? "btn-3d-alert" : "btn-3d"}>
-                          {connButtonText}
-                        </button>
-                      </div>
+                      <a href="/lp_en" className='btn-3d-white inline-flex'>
+                        <img
+                          className="h-8 w-auto"
+                          src="./watchdog.svg"
+                          alt=""
+                        />
+                      </a>
+                      <a href="https://arowana.me/authInvite" target="_blank" className={defaultAccount ? 'hidden' : 'btn-3d-white inline-flex btn-discord'}>
+                        <img
+                          className="h-7 w-auto mr-1"
+                          src="/logo/discord.svg"
+                          alt=""
+                        /><span>Discord</span>
+                      </a>
+                      <button onClick={connectWalletHandler} className={defaultAccount ? "btn-3d" : "hidden"}>
+                        {connButtonText}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -297,9 +318,16 @@ function Service() {
                         </div>
                       </div>
                     </div>
+                    <div className={defaultAccount ? 'hidden' : 'pb-5'}>
+                      <button onClick={connectWalletHandler} className={connButtonAlertClass ? "btn-3d-alert" : "btn-3d w-full"}>
+                        {connButtonText}
+                      </button>
+                    </div>
+
+
                     <div className={defaultAccount ? '' : 'hidden'}>
                       <div className='walletCard'>
-                        <Panel contract={contract} account={defaultAccount} onLogin={setLoginStatus} tokenName={tokenName} referral={referral}></Panel>
+                        <Panel contract={contract} account={defaultAccount} minted={minted} onLogin={setLoginStatus} tokenName={tokenName} referral={referral}></Panel>
                       </div>
                     </div>
                   </div>
@@ -312,9 +340,9 @@ function Service() {
               Losing or switching phone will never be a problem
             </p>
           </div>
-          <div className='my-6 mx-3 text-center'>
-            <div onClick={resetComfirm} className='text-gray-500 underline underline-offset-1'>Clear Browser Data</div>
-            <div className='mt-2 text-gray-800'>{chainId}</div>
+
+          <div className={ownerMode ? '' : 'hidden'}>
+            <Admin contract={contract}></Admin>
           </div>
         </main>
       </div>

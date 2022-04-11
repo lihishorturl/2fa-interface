@@ -11,8 +11,8 @@ import {
 const navigation = [
   { name: '服務介紹', href: '#features' },
   { name: '關於我們', href: 'https://knowledge.lihi.io/about-us/' },
-  { name: 'Binance Smart Chain 智能合約', href: 'https://bscscan.com/' },
-  { name: 'Github', href: 'https://github.com/' },
+  { name: '智能合約', href: 'https://bscscan.com/address/0x9945ca848b2f9ffe8f708989d157baa6a533c8e0' },
+  { name: 'Github', href: 'https://github.com/lihishorturl?tab=repositories' },
 ]
 const features = [
   {
@@ -44,10 +44,9 @@ export default function Landing() {
             >
               <div className="flex items-center flex-1">
                 <div className="flex items-center justify-between w-full md:w-auto">
-                  <a href="/app" className='bg-white rounded-full p-3'>
-                    <span className="sr-only">Workflow</span>
+                  <a href="/" className='btn-3d-white'>
                     <img
-                      className="h-8 w-auto sm:h-10"
+                      className="h-8 w-auto"
                       src="./watchdog.svg"
                       alt=""
                     />
@@ -70,14 +69,6 @@ export default function Landing() {
                     </a>
                   ))}
                 </div>
-              </div>
-              <div className="hidden md:flex md:items-center md:space-x-6">
-                <a
-                  href="/"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
-                >
-                  開始使用
-                </a>
               </div>
             </nav>
           </div>
@@ -123,7 +114,7 @@ export default function Landing() {
                   <div className="mt-6 px-5">
                     <a
                       href="/"
-                      className="block text-center w-full py-3 px-4 rounded-md shadow bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:from-teal-600 hover:to-cyan-700"
+                      className="btn-3d block text-center w-full py-3 px-4 rounded-md shadow bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:from-teal-600 hover:to-cyan-700"
                     >
                       開始使用
                     </a>
@@ -149,12 +140,10 @@ export default function Landing() {
                       手機一換金鑰就跟著不見全部都要重設<br />我們幫你加密上鏈讓你一輩子不用煩惱
                     </p>
                     <div className="mt-10 sm:mt-12">
-                      <form action="/">
-                        <button
-                          type="submit"
-                          className="block w-full py-3 px-4 rounded-md shadow bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:from-teal-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-400 focus:ring-offset-gray-900"
-                        >
-                          免費使用
+                      <form method="get" action="/">
+                        <button type="submit"
+                          className="btn-3d">
+                          開始使用
                         </button>
                       </form>
                     </div>
@@ -186,12 +175,15 @@ export default function Landing() {
                   把你的金鑰直接加密上練, 讓你的金鑰不會隨著手機消失
                 </p>
               </div>
-              <div className="mt-12">
-                <img
-                  className="rounded-lg shadow-xl ring-1 ring-black ring-opacity-5"
-                  src="./images/screenshot.png"
-                  alt=""
-                />
+              <div className="mt-12 pb-10">
+                <div className="grid grid-cols-6 gap-4">
+                  <div className="col-start-2 col-span-4">
+                    <img className="rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 w-full"
+                      src="./images/screenshot.png"
+                      alt=""
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -202,7 +194,6 @@ export default function Landing() {
               <p className="mt-2 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
                 服務優點
               </p>
-
               <div className="mt-12">
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {features.map((feature) => (

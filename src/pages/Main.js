@@ -56,7 +56,7 @@ export default function Main({ defaultAccount, started }) {
                   Thanks to blockchain, now you can keep your 2FA keys<br />safe and accessible FOREVER
                 </p>
                 <div className="mt-10 sm:mt-12">
-                  <form method="get" action="/app">
+                  <form method="get" action="/">
                     <button type="submit"
                       className="btn-3d">
                       Try it for FREE!
@@ -131,7 +131,7 @@ export default function Main({ defaultAccount, started }) {
           </div>
 
           <div className='mt-10'>
-            <form method="get" action="/app">
+            <form method="get" action="/">
               <button type="submit"
                 className="btn-3d">
                 Try it for FREE!

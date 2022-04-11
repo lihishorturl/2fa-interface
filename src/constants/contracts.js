@@ -1,4 +1,4 @@
-import Uni2fa_31337 from '../abis/Uni2fa.json';
+import Uni2fa_31337 from '../abis/Uni2fa_31337.json';
 import Uni2fa_97 from '../abis/Uni2fa_97.json';
 import Uni2fa_56 from '../abis/Uni2fa_56.json';
 import Uni2fa_80001 from '../abis/Uni2fa_80001.json';

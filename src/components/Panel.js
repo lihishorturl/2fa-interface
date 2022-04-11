@@ -5,7 +5,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import Instruction from '../components/Instruction'
 
-function Panel({ contract, account, onLogin, tokenName, referral }) {
+function Panel({ contract, account, onLogin, tokenName, referral, minted }) {
 
     const [code, setCode] = useState('');
     const [codeAgain, setCodeAgain] = useState('');
@@ -25,17 +25,52 @@ function Panel({ contract, account, onLogin, tokenName, referral }) {
         return false;
     }
 
-    function unlock() {
-        const item = localStorage.getItem(account);
-        const sha256 = CryptoJS.SHA256(code).toString(CryptoJS.enc.Hex);
-        if (sha256 === item && item != null && sha256.length > 0) {
-            setUnclockError('');
-            setShowMainPanel(true);
-            onLogin(true);
-            setHashKey(CryptoJS.SHA1(code).toString(CryptoJS.enc.Hex));
-        } else {
-            setUnclockError('Wrong passcode, re-try please');
+    async function unlock() {
+
+        if (!code || code.length > 32) {
+            MySwal.fire({
+                icon: 'error',
+                title: 'This passcode is not allow',
+            })
+            return
         }
+
+        const sha256 = CryptoJS.SHA256(code).toString(CryptoJS.enc.Hex);
+        const sha1 = CryptoJS.SHA1(code).toString(CryptoJS.enc.Hex)
+
+        if (!minted) {
+            const item = localStorage.getItem(account);
+            if (sha256 === item && item != null && sha256.length > 0) {
+                setUnclockError('');
+                setShowMainPanel(true);
+                onLogin(true);
+                setHashKey(sha1);
+            } else {
+                setUnclockError('Wrong passcode, re-try please');
+            }
+        } else {
+            const ids = await contract.getTokenIds();
+            const secret = await contract.getSecret(ids[0]);
+            const decrypted = decrypt(sha1, secret)
+
+            if (decrypted) {
+                setHashKey(sha1);
+                setHash(sha256)
+                setUnclockError('');
+                setShowMainPanel(true);
+                onLogin(true);
+                localStorage.setItem(account, sha256);
+            } else {
+                setUnclockError('Wrong passcode, re-try please');
+            }
+        }
+    }
+
+    function decrypt(key, ciphertext) {
+        const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+
+        return originalText;
     }
 
     function register() {
@@ -50,6 +85,14 @@ function Panel({ contract, account, onLogin, tokenName, referral }) {
             MySwal.fire({
                 icon: 'warning',
                 title: 'Empty Passcode is not allow',
+            })
+            return
+        }
+
+        if (code.length > 32) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Long passcode is not allow',
             })
             return
         }
@@ -106,21 +149,24 @@ function Panel({ contract, account, onLogin, tokenName, referral }) {
         );
     }
 
-    if (hash) {
+    if (hash || minted) {
         return (
             <>
                 <div className="bg-white sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden">
-                    <div className="px-4 pt-8 pb-4 sm:px-10">
+                    <div className="px-4 pt-2 pb-4 sm:px-10">
                         <div className="form-control w-full text-center">
                             <div className="mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 m-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span className="text-3xl font-bold text-gray-600">Unlock the Vault</span>
+                                <div className="mb-4 h-20 w-20 m-auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 m-auto " fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <span className="text-3xl font-bold text-gray-600 mt-2">Unlock your vault</span>
+                                <p className="text-xl mt-1">Please enter your vault passcode to unlock your vault.</p>
                             </div>
-                            <input onChange={(e) => { setCode(e.target.value) }} type="password" className="input input-bordered w-full text-center text-3xl bg-gray-600 mb-2" placeholder="••••••••" />
+                            <input onChange={(e) => { setCode(e.target.value) }} type="password" className="input input-bordered w-full text-center text-xl bg-gray-600 mb-2" placeholder="Enter your passcode" />
                             <button onClick={unlock} className="btn-3d">
-                                <span className='text-base mx-2.5'>Open</span>
+                                <span className='text-base mx-2.5'>Open vault</span>
                             </button>
                             <div className="text-center text-red-500 mt-2">
                                 {unclockError}
@@ -157,7 +203,7 @@ function Panel({ contract, account, onLogin, tokenName, referral }) {
                         <div className="form-control">
                             <label className="label cursor-pointer justify-start">
                                 <input type="checkbox" className="checkbox checkbox-primary" value="on2" onChange={(e) => { setConfirm(e.target.checked) }} />
-                                <span className="pl-3 label-text text-gray-500 text-left">I understand that lihi cannot recover<br className="block lg:hidden"/> the passcode for me.</span>
+                                <span className="pl-3 label-text text-gray-500 text-left">I understand that lihi cannot recover<br className="block lg:hidden" /> the passcode for me.</span>
                             </label>
                         </div>
                         <label className="label">

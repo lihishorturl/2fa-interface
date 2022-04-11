@@ -28,8 +28,7 @@ export default function Nav({ defaultAccount }) {
         >
           <div className="flex items-center flex-1">
             <div className="flex items-center justify-between w-full md:w-auto">
-              <a href="/app" className='bg-white rounded-full p-2'>
-                <span className="sr-only">Workflow</span>
+              <a href="/" className='btn-3d-white'>
                 <img
                   className="h-8 w-auto"
                   src="./watchdog.svg"
@@ -56,7 +55,7 @@ export default function Nav({ defaultAccount }) {
             </div>
           </div>
           <div className={defaultAccount?"hidden md:flex md:items-center md:space-x-6":'hidden'}>
-            <a href="/app" className="text-base font-medium text-white hover:text-gray-300">
+            <a href="/" className="text-base font-medium text-white hover:text-gray-300">
               {firstSix + '...' + lastFive}
             </a>
           </div>

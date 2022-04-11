@@ -59,10 +59,47 @@
   box-shadow: 0 0 0 #b65d5d;
 }
 
+
+
+.btn-3d-white {
+  height: 44px;
+  font-size: 17px;
+  font-weight: 700;
+  outline: none;
+  margin: 2px;
+  background: -webkit-gradient(linear,left top,left bottom,from(#ffffff),to(#ffffff));
+  background: -webkit-linear-gradient(top,#ffffff,#ffffff);
+  background: linear-gradient(180deg,#ffffff,#ffffff);
+  -webkit-box-shadow: 0 4px 0 #c5c5c5;
+  -webkit-box-shadow: 0 4px 0 #c5c5c5;
+  box-shadow: 0 4px 0 #c5c5c5;
+  color:black;
+  border-radius: 24px;
+  padding: 6.4px 20px;
+  -webkit-transition: all .1s linear;
+  transition: all .1s linear;
+}
+
+.btn-3d-white:hover {
+  -webkit-transform: translateY(3px);
+  transform: translateY(3px);
+  -webkit-box-shadow: 0 0 0 #c5c5c5;
+  box-shadow: 0 0 0 #c5c5c5;
+}
+
+
 .panel {
   border-radius: 24px;
 }
 
 .input {
   border-radius: 20px;
+}
+
+.btn-discord span {
+  margin-top: 4px;
+}
+
+.btn-discord img {
+  margin-top: 3px;
 }

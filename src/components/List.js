@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 import Clock from './Clock';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { addresses } from '../constants/whitelist';
 const totp = require("totp-generator");
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require('keccak256')
@@ -91,7 +92,6 @@ export default function List({ contract, account, hashKey, tokenName, referral }
         const secret = await contract.getSecret(ids[i]);
         const bytes32 = await contract.getNote(ids[i]);
         const note = ethers.utils.parseBytes32String(bytes32);
-
         try {
           rows.push({ id: ids[i].toNumber(), note, secret, top: totp(decrypt(hashKey, secret)) })
         } catch (error) {
@@ -189,14 +189,6 @@ export default function List({ contract, account, hashKey, tokenName, referral }
           await transaction.wait();
         }
       } else {
-        const addresses = [
-          '0x205e68646864167Eb744614048d6C43935CcA8B1',
-          '0x26Efd827f012C4D156DC7D97b30f09338a0A8F31',
-          '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-          '0x31786101b8B76AcF82067256f485Deb60422EAd1',
-          '0x75ef9f58f9e7f4ED773214F4af58C4C9afbDA52D',
-          '0xEE4Fd383d650b1839F97a79fD954137Dc8D75E3F',
-        ];
         const nodes = addresses.map(addr => keccak256(addr));
         const tree = new MerkleTree(nodes, keccak256, { sortPairs: true });
         const leaf = keccak256(account);
@@ -216,6 +208,9 @@ export default function List({ contract, account, hashKey, tokenName, referral }
         message = error.data.message
         if (message.includes("insufficient funds for gas")) {
           message = 'Insufficient funds for gas'
+        }
+        if (message.includes("Invalid proof")) {
+          message = 'Sorry, You are NOT in the whitelist'
         }
       } else if (error['message'] !== undefined) {
         message = error['message']
