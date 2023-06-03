@@ -3,7 +3,6 @@ import { ethers } from 'ethers'
 import React, { useEffect, useState } from "react";
 import Panel from '../components/Panel';
 import Steps from '../components/Steps';
-import Admin from '../components/Admin';
 import { useSearchParams } from "react-router-dom";
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import { networks } from '../constants/networks';
@@ -336,13 +335,23 @@ function Service() {
             </div>
           </div>
           <div className='my-6 mx-3 text-center'>
-            <p className='text-white font-bold'>Keep it safe & accessible forever<br />
+            <div className='lg:grid lg:grid-cols-6 lg:gap-4'>
+              <div className='lg:col-start-2 lg:col-span-4'>
+                <h2 className="mb-5">Set up instructions - <a className="underline decoration-1"
+                                                              href="https://lihi.marketing/2FAInstruction"
+                                                              target="_blank">https://lihi.marketing/2FAInstruction</a></h2>
+                <div className="videobox">
+                  <iframe width="560" height="315" src="https://www.youtube.com/embed/fQEH8U-Eemo"
+                          title="YouTube video player" frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen=""></iframe>
+                </div>
+              </div>
+            </div>
+
+            <p className='text-white font-bold mt-5'>Keep it safe & accessible forever<br />
               Losing or switching phone will never be a problem
             </p>
-          </div>
-
-          <div className={ownerMode ? '' : 'hidden'}>
-            <Admin contract={contract}></Admin>
           </div>
         </main>
       </div>

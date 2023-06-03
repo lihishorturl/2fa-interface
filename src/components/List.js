@@ -4,11 +4,8 @@ import CryptoJS from 'crypto-js';
 import Clock from './Clock';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import {addresses} from '../constants/whitelist';
 
 const totp = require("totp-generator");
-const { MerkleTree } = require('merkletreejs')
-const keccak256 = require('keccak256')
 
 let mintChecker;
 let punchChecker;
@@ -202,9 +199,6 @@ export default function List({ contract, account, hashKey }) {
         if (message.includes("insufficient funds for gas")) {
           message = 'Insufficient funds for gas'
         }
-        if (message.includes("Invalid proof")) {
-          message = 'Sorry, You are NOT in the whitelist'
-        }
       } else if (error['message'] !== undefined) {
         message = error['message']
       }
@@ -262,34 +256,15 @@ export default function List({ contract, account, hashKey }) {
     return bytes.toString(CryptoJS.enc.Utf8);
   }
 
-  function getHexProof() {
-    const nodes = addresses.map(addr => keccak256(addr));
-    const tree = new MerkleTree(nodes, keccak256, {sortPairs: true});
-    const leaf = keccak256(account);
-    const buf2hex = x => '0x' + x.toString('hex')
-    return tree.getProof(leaf).map(x => buf2hex(x.data));
-  }
-
   async function punch() {
     const MySwal = withReactContent(Swal)
     let result = false
-    try {
-      result = await contract.getProof(getHexProof());
-    }catch (error) {
-      console.log(error)
-    }
+
     try {
       setStatusMessage('Transaction is being processed on blockchain, please check your wallet')
       punchCheckerStart()
-      let tx
-      console.log(result)
-      if(result === true) {
-        tx = { value: ethers.utils.parseEther((price / 2).toString())}
-        await contract.listPunch(getHexProof(), tx);
-      }else{
-        tx = { value: ethers.utils.parseEther(price.toString())}
-        await contract.punch(tx);
-      }
+      let tx = { value: ethers.utils.parseEther(price.toString())}
+      await contract.punch(tx);
 
     } catch (error) {
       setStatusMessage('')

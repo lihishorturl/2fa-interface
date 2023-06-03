@@ -103,3 +103,18 @@
 .btn-discord img {
   margin-top: 3px;
 }
+
+.videobox {
+  height: 0;
+  padding-bottom: 56.25%;
+  position: relative;
+  width: 100%;
+}
+
+.videobox iframe {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}

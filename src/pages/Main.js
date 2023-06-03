@@ -143,7 +143,7 @@ export default function Main({ defaultAccount, started }) {
               <p className="mt-10 mb-10 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
                 Our Team
               </p>
-              <div className="grid grid-cols-2 gap-8 md:grid-cols-6 lg:grid-cols-5 pt-2">
+              <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-4 pt-2">
                 <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
                   <div className="avatar flex flex-col">
                     <div className="mask mask-hexagon">
@@ -166,14 +166,6 @@ export default function Main({ defaultAccount, started }) {
                       <img src="./images/team/mos.jpeg" alt=''/>
                     </div>
                     <span className='text-gray-500 text-center pt-3'>Mos</span>
-                  </div>
-                </div>
-                <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
-                  <div className="avatar flex flex-col">
-                    <div className="mask mask-hexagon">
-                      <img src="./images/team/simon.png" alt=''/>
-                    </div>
-                    <span className='text-gray-500 text-center pt-3'>Simon</span>
                   </div>
                 </div>
                 <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
