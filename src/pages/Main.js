@@ -30,7 +30,7 @@ export default function Main({ defaultAccount, started }) {
     social: [
       {
         name: 'Discord',
-        href: 'https://arowana.me/authInvite',
+        href: 'https://discord.gg/ZP9vQ5Bdgx',
         icon: (props) => (
           <img src="./logo/discord.svg" className='h-10' alt=''></img>
         ),

@@ -294,7 +294,7 @@ function Service() {
                           alt=""
                         />
                       </a>
-                      <a href="https://arowana.me/authInvite" target="_blank" className={defaultAccount ? 'hidden' : 'btn-3d-white inline-flex btn-discord'}>
+                      <a href="https://discord.gg/ZP9vQ5Bdgx" target="_blank" className={defaultAccount ? 'hidden' : 'btn-3d-white inline-flex btn-discord'}>
                         <img
                           className="h-7 w-auto mr-1"
                           src="/logo/discord.svg"
