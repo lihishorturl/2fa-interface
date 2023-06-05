@@ -1,18 +1,16 @@
-import { ethers } from 'ethers'
-import { useState, useEffect } from 'react'
+import {ethers} from 'ethers'
+import {useEffect, useState} from 'react'
 import CryptoJS from 'crypto-js';
 import Clock from './Clock';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import { addresses } from '../constants/whitelist';
+
 const totp = require("totp-generator");
-const { MerkleTree } = require('merkletreejs')
-const keccak256 = require('keccak256')
 
 let mintChecker;
 let punchChecker;
 
-export default function List({ contract, account, hashKey, tokenName, referral }) {
+export default function List({ contract, account, hashKey }) {
 
   const [statusMessage, setStatusMessage] = useState('');
   const [note, setNote] = useState('');
@@ -90,8 +88,8 @@ export default function List({ contract, account, hashKey, tokenName, referral }
       var rows = []
       for (let i = 0; i < ids.length; i += 1) {
         const secret = await contract.getSecret(ids[i]);
-        const bytes32 = await contract.getNote(ids[i]);
-        const note = ethers.utils.parseBytes32String(bytes32);
+        const encrypted = await contract.getNote(ids[i]);
+        const note = atou(decrypt(hashKey, encrypted));
         try {
           rows.push({ id: ids[i].toNumber(), note, secret, top: totp(decrypt(hashKey, secret)) })
         } catch (error) {
@@ -104,6 +102,14 @@ export default function List({ contract, account, hashKey, tokenName, referral }
       console.log(error)
     }
   };
+
+  function utoa(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+// Decode
+  function atou(str) {
+    return decodeURIComponent(escape(atob(str)));
+  }
 
   function _setSlot(slot) {
     if (slot < 1) return;
@@ -173,30 +179,14 @@ export default function List({ contract, account, hashKey, tokenName, referral }
       document.getElementById('note-field').value = '';
       document.getElementById("mint-modal").checked = false;
 
-      const bytes32 = ethers.utils.formatBytes32String(note)
+      const noteEncrypted = encrypt(hashKey,utoa(note))
+      // const bytes32 = ethers.utils.formatBytes32String(note)
+      // console.log(bytes32)
       const mintStatus = await contract.getMintStatus();
-      const saleStatus = await contract.getStatus();
       console.log('mintStatus: ' + mintStatus);
-      console.log('saleStatus: ' + saleStatus);
 
-      if (mintStatus) {
-        if (referral) {
-          ethers.utils.getAddress(referral)
-          const transaction = await contract.mintWithReferral(encrypted, bytes32, referral);
-          await transaction.wait();
-        } else {
-          const transaction = await contract.mint(encrypted, bytes32);
-          await transaction.wait();
-        }
-      } else {
-        const nodes = addresses.map(addr => keccak256(addr));
-        const tree = new MerkleTree(nodes, keccak256, { sortPairs: true });
-        const leaf = keccak256(account);
-        const buf2hex = x => '0x' + x.toString('hex')
-        const hexproof = tree.getProof(leaf).map(x => buf2hex(x.data))
-        const transaction = await contract.whitelistMint(encrypted, bytes32, hexproof);
-        await transaction.wait();
-      }
+      const transaction = await contract.mint(encrypted, noteEncrypted);
+      await transaction.wait();
 
     } catch (error) {
       console.log(error)
@@ -208,9 +198,6 @@ export default function List({ contract, account, hashKey, tokenName, referral }
         message = error.data.message
         if (message.includes("insufficient funds for gas")) {
           message = 'Insufficient funds for gas'
-        }
-        if (message.includes("Invalid proof")) {
-          message = 'Sorry, You are NOT in the whitelist'
         }
       } else if (error['message'] !== undefined) {
         message = error['message']
@@ -225,6 +212,7 @@ export default function List({ contract, account, hashKey, tokenName, referral }
   async function handleUpdateCallback(id, secret, note) {
 
     const encrypted = encrypt(hashKey, secret)
+    const noteEncrypted = encrypt(hashKey,utoa(note))
 
     try {
       setStatusMessage('Transaction is being processed on blockchain, please check your wallet and reload page to fetch data');
@@ -233,8 +221,7 @@ export default function List({ contract, account, hashKey, tokenName, referral }
       document.getElementById('clock-note-field').value = '';
       document.getElementById("update-modal").checked = false;
       setUpdateError('')
-      const bytes32 = ethers.utils.formatBytes32String(note)
-      const transaction = await contract.update(id, encrypted, bytes32);
+      const transaction = await contract.update(id, encrypted, noteEncrypted);
       await transaction.wait();
 
     } catch (error) {
@@ -266,21 +253,17 @@ export default function List({ contract, account, hashKey, tokenName, referral }
 
   function decrypt(key, ciphertext) {
     const bytes = CryptoJS.AES.decrypt(ciphertext, key);
-    const originalText = bytes.toString(CryptoJS.enc.Utf8);
-
-    return originalText;
+    return bytes.toString(CryptoJS.enc.Utf8);
   }
 
   async function punch() {
     const MySwal = withReactContent(Swal)
-    try {
+    let result = false
 
+    try {
       setStatusMessage('Transaction is being processed on blockchain, please check your wallet')
       punchCheckerStart()
-
-      const tx = {
-        value: ethers.utils.parseEther(price),
-      }
+      let tx = { value: ethers.utils.parseEther(price.toString())}
       await contract.punch(tx);
 
     } catch (error) {
@@ -300,10 +283,6 @@ export default function List({ contract, account, hashKey, tokenName, referral }
         title: message,
       })
     }
-  }
-
-  function copyReferral() {
-    navigator.clipboard.writeText(document.location.origin + '?r=' + account)
   }
 
   if (contract === 'undefined') {
@@ -333,7 +312,7 @@ export default function List({ contract, account, hashKey, tokenName, referral }
                 onChange={(e) => { setNote(e.target.value) }}
                 type="text"
                 className="input input-bordered w-full text-white bg-gray-600 focus:placeholder-gray-400"
-                placeholder="Service name / Account (Ex. Binance, Cloudflare, FTX and etc)" />
+                placeholder="Service: account@email.com" />
             </div>
             <div className="w-full text-gray-400 focus-within:text-gray-600 mt-2">
               <input
@@ -357,33 +336,14 @@ export default function List({ contract, account, hashKey, tokenName, referral }
       </div>
 
       <input type="checkbox" id="share-modal" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box relative">
-          <label htmlFor="share-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
-          <form className="w-full md:ml-0" action="#" method="GET">
-            <h3 className="font-bold text-lg mb-3">Referral url is copied</h3>
-            <div className="w-full text-gray-400 focus-within:text-gray-600 mt-2">
-              Anyone minted by this referral url, you will earn a slot for free, until limit is reached.
-              <div className='mt-5 text-info'>
-                <a href='https://en.wikipedia.org/wiki/Multi-factor_authentication'>Why we use 2-step verification</a>
-              </div>
-            </div>
-            <div className="modal-action">
-              <button htmlFor="share-modal" className="mt-2 w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span className='text-base mx-2.5'>OK</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
 
       <div className="bg-white sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden pb-2">
         <div className="px-4 sm:px-10">
           <div className="form-control w-full text-center">
-            <div className="w-full md:ml-0" action="#" method="GET">
-              <button onClick={openMintModal} className="btn-3d w-full">
+            <div className="w-full md:ml-0">
+              {(slots - minted) > 0 && <button onClick={openMintModal} className="btn-3d w-full">
                 <span className='text-base mx-2.5'>Mint your Authenticator</span>
-              </button>
+              </button>}
               <p className='mt-2 text-purple-800 font-extrabold'>{statusMessage}</p>
             </div>
             <div className="h-full flex mb-3">
@@ -393,14 +353,14 @@ export default function List({ contract, account, hashKey, tokenName, referral }
                     <Clock secrets={secrets} address={account} updateCallback={handleUpdateCallback} hashKey={hashKey} updateError={updateError}></Clock>
                   </main>
                 </div>
-                <div className='mt-3'><p className='text-gray-500'>{(slots - minted)} free slots available for mint </p></div>
+                <div className='mt-3'><p className='text-gray-500'>{(slots - minted)} / {slots} slots available for mint </p></div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden hidden">
+      <div className="bg-white sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden">
         <hr />
         <div className="px-4 pb-2 sm:px-10 mt-3">
           <div className='text-center'>
@@ -408,13 +368,7 @@ export default function List({ contract, account, hashKey, tokenName, referral }
           </div>
           <div className="flex flex-col w-full border-opacity-50 py-3">
             <div className="grid place-items-center">
-              <button htmlFor="share-modal" onClick={copyReferral} className="btn-3d text-gray-400 w-full" disabled="disabled">
-                <span className='text-base mx-2.5'>Share Dapp</span>
-              </button>
-            </div>
-            <div className="divider my-2">OR</div>
-            <div className="grid place-items-center">
-              <button className="btn-3d text-gray-400 w-full" onClick={punch} disabled="disabled">
+              <button className="btn-3d text-gray-400 w-full" onClick={punch}>
                 <span className='text-base mx-2.5'>Purchase {quantity} slots</span>
               </button>
             </div>

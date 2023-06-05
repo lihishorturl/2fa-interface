@@ -164,7 +164,7 @@ function Panel({ contract, account, onLogin, tokenName, referral, minted }) {
                                 <span className="text-3xl font-bold text-gray-600 mt-2">Unlock your vault</span>
                                 <p className="text-xl mt-1">Please enter your vault passcode to unlock your vault.</p>
                             </div>
-                            <input onChange={(e) => { setCode(e.target.value) }} type="password" className="input input-bordered w-full text-center text-xl bg-gray-600 mb-2" placeholder="Enter your passcode" />
+                            <input autoFocus onKeyUp={(e) => { if(e.key === 'Enter') unlock();}} onChange={(e) => { setCode(e.target.value) }} type="password" className="input input-bordered w-full text-center text-xl bg-gray-600 mb-2" placeholder="Enter your passcode" />
                             <button onClick={unlock} className="btn-3d">
                                 <span className='text-base mx-2.5'>Open vault</span>
                             </button>

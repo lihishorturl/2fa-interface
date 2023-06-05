@@ -114,7 +114,7 @@ class Clock extends React.Component {
                             name="note"
                             onChange={this.onFieldChange.bind(this)}
                             className="input input-bordered w-full text-white bg-gray-600 focus:placeholder-gray-400 mb-3"
-                            placeholder="Service name / Account (Ex. Binance, Cloudflare, FTX and etc)" />
+                            placeholder="Service: account@email.com" />
                         <input
                             id="clock-secret-field"
                             type="text"
