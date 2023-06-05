@@ -11,7 +11,7 @@ import {
 const navigation = [
   { name: '服務介紹', href: '#features' },
   { name: '關於我們', href: 'https://knowledge.lihi.io/about-us/' },
-  { name: '智能合約', href: 'https://bscscan.com/address/0x9945ca848b2f9ffe8f708989d157baa6a533c8e0' },
+  { name: '智能合約', href: 'https://bscscan.com/address/0x3c8c45C97c84C932Bf1B20B55167Dbd98Fd702c6' },
   { name: 'Github', href: 'https://github.com/lihishorturl?tab=repositories' },
 ]
 const features = [
