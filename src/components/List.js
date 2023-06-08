@@ -275,7 +275,13 @@ export default function List({ contract, account, hashKey }) {
           message = 'Insufficient funds for gas'
         }
       } else if (error['message'] !== undefined) {
-        message = error['message']
+        if(error['message'].includes("insufficient")) {
+          message = 'Insufficient funds for gas fee in wallet'
+        } else if(error['message'].includes("User denied transaction signature")) {
+          message = 'Transaction canceled'
+        } else {
+          message = error['message']
+        }
       }
 
       MySwal.fire({
