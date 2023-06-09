@@ -383,6 +383,7 @@ export default function List({ contract, account, hashKey }) {
                 </div>
               </div>
             </div>
+            <div className='mt-2'><p className='text-gray-500'>{(slots - minted)} / {slots} slots available for mint </p></div>
           </div>
         </div>
       </div>
