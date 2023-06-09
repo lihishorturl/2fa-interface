@@ -1,6 +1,7 @@
 import {ethers} from 'ethers'
 import {useEffect, useState} from 'react'
 import CryptoJS from 'crypto-js';
+import Visual from './Visual';
 import Clock from './Clock';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -25,6 +26,7 @@ export default function List({ contract, account, hashKey }) {
   const [mintError, setMintError] = useState('');
   const [updateError, setUpdateError] = useState('');
   const [mintModal, setMintModal] = useState(false);
+  const [visualMode, setVisualMode] = useState(false);
   const MySwal = withReactContent(Swal)
 
   useEffect(() => {
@@ -187,6 +189,7 @@ export default function List({ contract, account, hashKey }) {
 
       const transaction = await contract.mint(encrypted, noteEncrypted);
       await transaction.wait();
+      setNote('');
 
     } catch (error) {
       console.log(error)
@@ -295,6 +298,16 @@ export default function List({ contract, account, hashKey }) {
     return '';
   }
 
+  function startVisualMode()
+  {
+    setVisualMode(true)
+  }
+
+  function closeVisualMode()
+  {
+    setVisualMode(false)
+  }
+
   function openMintModal() {
     setMintModal(true)
   }
@@ -309,8 +322,16 @@ export default function List({ contract, account, hashKey }) {
       <div className={mintModal ? 'modal modal-open' : 'modal'}>
         <div className="modal-box relative">
           <label onClick={closeMintModal} className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
-          <form className="w-full md:ml-0" action="#" method="GET">
-            <h3 className="font-bold text-lg mb-3">Fill the 2FA secret & provider name</h3>
+          {(slots - minted) <= 0 && <form className="w-full md:ml-0" action="#" method="GET">
+            <h3 className="font-bold text-lg mb-3">{(slots - minted)} / {slots} slots available for mint.</h3>
+            <div className="modal-action">
+              <button className="btn-3d text-gray-400 w-full" onClick={punch}>
+                <span className='text-base mx-2.5'>Purchase {quantity} slots</span>
+              </button>
+            </div>
+          </form>}
+          {(slots - minted) > 0 && <form className="w-full md:ml-0" action="#" method="GET">
+            <h3 className="font-bold text-lg mb-3">Fill Account & the 2FA secret</h3>
             <div className="w-full text-gray-400 focus-within:text-gray-600">
               <input
                 defaultValue={note}
@@ -337,7 +358,7 @@ export default function List({ contract, account, hashKey }) {
             <label className="label">
               <span className="label-text text-red-500">{mintError}</span>
             </label>
-          </form>
+          </form>}
         </div>
       </div>
 
@@ -347,7 +368,7 @@ export default function List({ contract, account, hashKey }) {
         <div className="px-4 sm:px-10">
           <div className="form-control w-full text-center">
             <div className="w-full md:ml-0">
-              {(slots - minted) > 0 && <button onClick={openMintModal} className="btn-3d w-full">
+              {<button onClick={openMintModal} className="btn-3d w-full">
                 <span className='text-base mx-2.5'>Mint your Authenticator</span>
               </button>}
               <p className='mt-2 text-purple-800 font-extrabold'>{statusMessage}</p>
@@ -356,30 +377,34 @@ export default function List({ contract, account, hashKey }) {
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 flex items-stretch">
                   <main className="flex-1 overflow-y-auto">
-                    <Clock secrets={secrets} address={account} updateCallback={handleUpdateCallback} hashKey={hashKey} updateError={updateError}></Clock>
+                    {!visualMode && <Clock secrets={secrets} address={account} updateCallback={handleUpdateCallback} hashKey={hashKey} updateError={updateError}></Clock>}
+                    {visualMode && <Visual secrets={secrets} address={account} updateCallback={handleUpdateCallback} hashKey={hashKey} updateError={updateError}></Visual>}
                   </main>
                 </div>
-                <div className='mt-3'><p className='text-gray-500'>{(slots - minted)} / {slots} slots available for mint </p></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
       <div className="bg-white sm:w-full sm:mx-auto sm:rounded-lg sm:overflow-hidden">
-        <hr />
-        <div className="px-4 pb-2 sm:px-10 mt-3">
-          <div className='text-center'>
-            <p className='text-gray-500 font-bold'>Need more 2FA slots?</p>
-          </div>
-          <div className="flex flex-col w-full border-opacity-50 py-3">
+        {!visualMode && <div className="px-4 pb-2 sm:px-10">
+          <div className="flex flex-col w-full border-opacity-50 p-2">
             <div className="grid place-items-center">
-              <button className="btn-3d text-gray-400 w-full" onClick={punch}>
-                <span className='text-base mx-2.5'>Purchase {quantity} slots</span>
+              <button className="btn-3d text-gray-400 w-full" onClick={startVisualMode}>
+                <span className='text-base mx-2.5'>Start Visual Mode</span>
               </button>
             </div>
           </div>
-        </div>
+        </div>}
+        {visualMode && <div className="px-4 pb-2 sm:px-10">
+          <div className="flex flex-col w-full border-opacity-50 p-2">
+            <div className="grid place-items-center">
+              <button className="btn-3d text-gray-400 w-full" onClick={closeVisualMode}>
+                <span className='text-base mx-2.5'>Close Visual Mode</span>
+              </button>
+            </div>
+          </div>
+        </div>}
       </div>
 
     </>

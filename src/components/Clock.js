@@ -65,8 +65,12 @@ class Clock extends React.Component {
             if (decrypted === '') {
                 top = 'WRONG PASSCODE';
             }
+            let status = true
+            if(localStorage.getItem(id)) {
+                status = (localStorage.getItem(id) === 'true')
+            }
 
-            rows.push({ id, note, secret, top, text });
+            rows.push({ id, note, secret, status, top, text });
         }
         this.setState({
             date: new Date(),
@@ -86,8 +90,9 @@ class Clock extends React.Component {
             <div>
                 <progress className={this.props.secrets.length > 0 ? "progress progress-info my-2 w-full" : 'hidden'} value={this.state.time % 30 * 3.45} max="100">Refresh</progress>
                 <ul className="flex flex-col divide-y w-full rounded-lg">
-                    {this.state.secrets.map((secret) => (
-                        <li className="flex flex-row" onClick={() => this.copy(secret)} key={secret.id}>
+                    {this.state.secrets.map((secret) => {
+                        return secret.status === true &&
+                        (<li className="flex flex-row" onClick={() => this.copy(secret)} key={secret.id}>
                             <div className="select-none cursor-pointer hover:border-2 hover:border-sky-500 hover:border-dashed flex flex-1 items-center p-4 bg-gray-100">
                                 <div className="flex-1 pl-1">
                                     <div className="font-medium text-gray-500">{secret.note}</div>
@@ -95,8 +100,8 @@ class Clock extends React.Component {
                                     <p>{secret.text}</p>
                                 </div>
                             </div>
-                        </li>
-                    ))}
+                      </li>)
+                    })}
                 </ul>
                 <div className="hidden">
                     <label htmlFor="update-modal" className="mt-2 w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
