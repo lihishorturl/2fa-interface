@@ -247,7 +247,7 @@ function Service() {
             cancelButtonText: 'Stay',
           }).then((result) => {
             if (result.isConfirmed) {
-              window.location.href = 'https://2fa.lihi.io'
+              window.location.href = 'https://otp.lihi.io'
             }
           })
         }
