@@ -32,6 +32,10 @@ function Service() {
   const MySwal = withReactContent(Swal)
 
   useEffect(() => {
+    if(localStorage.getItem('whitelist') === 'redirect'){
+      window.location.href = 'https://otp.lihi.io'
+    }
+
     document.body.classList.remove('bg-loading');
     if (!defaultAccount) return;
     const r = searchParams.get("r")
@@ -238,7 +242,7 @@ function Service() {
         const signer = await provider.getSigner();
         const signerAddress = await signer.getAddress();
 
-        if(addresses.includes(signerAddress)) {
+        if(addresses.includes(signerAddress) && localStorage.getItem('whitelist') !== 'stay') {
           MySwal.fire({
             icon: 'info',
             title: 'You are on the whitelist, please redirect to the dedicated website.',
@@ -247,7 +251,10 @@ function Service() {
             cancelButtonText: 'Stay',
           }).then((result) => {
             if (result.isConfirmed) {
+              localStorage.setItem('whitelist', 'redirect')
               window.location.href = 'https://otp.lihi.io'
+            }else{
+              localStorage.setItem('whitelist', 'stay')
             }
           })
         }
