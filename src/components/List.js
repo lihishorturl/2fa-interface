@@ -21,7 +21,7 @@ export default function List({ contract, account, hashKey }) {
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [idList, setIds] = useState([]);
-  const [slots, setSlots] = useState(2);
+  const [slots, setSlots] = useState(3);
   const [minted, setMinted] = useState(0);
   const [counter, setCounter] = useState(0);
   const [mintError, setMintError] = useState('');
