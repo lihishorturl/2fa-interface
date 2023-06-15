@@ -5,6 +5,7 @@ import Visual from './Visual';
 import Clock from './Clock';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { Html5Qrcode } from "html5-qrcode";
 
 const totp = require("totp-generator");
 
@@ -24,8 +25,11 @@ export default function List({ contract, account, hashKey }) {
   const [minted, setMinted] = useState(0);
   const [counter, setCounter] = useState(0);
   const [mintError, setMintError] = useState('');
+  const [scanMessage, setScanMessage] = useState('');
   const [updateError, setUpdateError] = useState('');
+  const [scanLock, setScanLock] = useState(false);
   const [mintModal, setMintModal] = useState(false);
+  const [html5QrCode, setHtml5QrCode] = useState(null);
   const [visualMode, setVisualMode] = useState(false);
   const MySwal = withReactContent(Swal)
 
@@ -309,11 +313,107 @@ export default function List({ contract, account, hashKey }) {
   }
 
   function openMintModal() {
+    setScanMessage('')
     setMintModal(true)
   }
 
   function closeMintModal() {
+    setScanMessage('')
     setMintModal(false)
+    stopScan()
+  }
+
+  function getParameterByName(name, url) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  }
+
+  function createScan() {
+    if (scanLock === true) return
+    setScanLock(true)
+    document.getElementById('btn-scan-start').textContent = 'Permissions requesting...'
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        document.getElementById('btn-scan-start').textContent = 'Scan a QR code'
+        document.getElementById('scan-start').style.display = 'none'
+        setScanMessage('')
+        const reader = new Html5Qrcode(/* element id */ "createReader");
+        setHtml5QrCode(reader)
+        reader.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,    // Optional, frame per seconds for qr code scanning
+            qrbox: { width: 250, height: 250 }  // Optional, if you want bounded box UI
+          },
+          (decodedText, decodedResult) => {
+            let text = decodeURIComponent(decodedText)
+            if (!text.includes('otpauth://totp/') || !text.includes('secret=')) {
+              setScanMessage('Invalid 2FA QRcode (TOTP)')
+              return;
+            }
+            let note = text.substring(15, text.length).split("?")[0].split(":")[0];
+            let secret = getParameterByName('secret', text);
+            let issuer = getParameterByName('issuer', text);
+
+            if(!note.includes(issuer)) note = issuer + ' (' + note + ')'
+
+            if (note && secret) {
+              setNote(note);
+              setSecret(secret);
+              setScanMessage('Imported successfully')
+              setMintError('')
+            } else {
+              setScanMessage('Something wrong')
+            }
+
+            try {
+              reader.stop().then((ignore) => {
+                // QR Code scanning is stopped.
+              }).catch((err) => {
+              });
+            } catch (err) {
+            }
+            setScanLock(false)
+            // do something when code is read
+          },
+          (errorMessage) => {
+            // parse error, ignore it.
+          })
+          .catch((err) => {
+            // Start failed, handle it.
+            setScanMessage(err)
+            setScanLock(false)
+          });
+      }
+    }).catch(err => {
+      MySwal.fire({
+        icon: 'error',
+        title: 'Permission Deny',
+        text: 'The request is not allowed by the user agent or the platform in the current context.',
+        confirmButtonText: 'Reload Page',
+      }).then(() => {
+        window.location.reload();
+      })
+      setScanMessage(err)
+      setScanLock(false)
+      document.getElementById('btn-scan-start').textContent = 'Scan a QR code'
+    });
+  }
+
+  function stopScan() {
+    document.getElementById('scan-start').style.display = 'block'
+    try {
+      html5QrCode.stop().then((ignore) => {
+        // QR Code scanning is stopped.
+      }).catch((err) => {
+      });
+    } catch (err) {
+    }
+    setScanLock(false)
   }
 
   return (
@@ -332,6 +432,13 @@ export default function List({ contract, account, hashKey }) {
           </form>}
           {(slots - minted) > 0 && <form className="w-full md:ml-0" action="#" method="GET">
             <h3 className="font-bold text-lg mb-3">Fill Account & the 2FA secret</h3>
+            <div id='scan-start' className='btn-3d w-full text-center scan-start mt-3' onClick={createScan}>
+              <button id='btn-scan-start' className='btn-scan-start' type='button' >Scan a QR code</button>
+            </div>
+            <div id="createReader"></div>
+            <label className='label'>
+              <span className={scanMessage === 'Imported successfully' ? "label-text text-green-500 pt-1" : "label-text text-red-500 pt-1"}>{scanMessage}</span>
+            </label>
             <div className="w-full text-gray-400 focus-within:text-gray-600">
               <input
                 defaultValue={note}
