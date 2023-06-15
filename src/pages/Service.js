@@ -10,6 +10,7 @@ import { contracts } from '../constants/contracts';
 import { tokenNames } from '../constants/tokenNames';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import {addresses} from "../constants/whitelist";
 
 function Service() {
 
@@ -236,6 +237,21 @@ function Service() {
 
         const signer = await provider.getSigner();
         const signerAddress = await signer.getAddress();
+
+        if(addresses.includes(signerAddress)) {
+          MySwal.fire({
+            icon: 'info',
+            title: 'You are on the whitelist, please redirect to the dedicated website.',
+            showCancelButton: true,
+            confirmButtonText: 'Go',
+            cancelButtonText: 'Stay',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = 'https://2fa.lihi.io'
+            }
+          })
+        }
+
         setDefaultAccount(signerAddress);
 
         const uni2fa = await new ethers.Contract(
