@@ -76,8 +76,8 @@ class Visual extends React.Component {
                                 <div className="flex-1 pl-1">
                                     <div className="font-medium text-gray-500">{secret.note}</div>
                                     <div className="inline-flex justify-center">
-                                        {secret.status === true && <img style={{width: '30px'}} src={show} alt=''/>}
-                                        {secret.status === false && <img style={{width: '25px', marginTop: '3px'}} src={hide} alt=''/>}
+                                        {secret.status === true && 'show'}
+                                        {secret.status === false && 'hide'}
                                     </div>
                                     <p>{secret.text}</p>
                                 </div>

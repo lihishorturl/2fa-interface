@@ -164,6 +164,7 @@ export default function List({ contract, account, hashKey }) {
       return;
     }
 
+
     const formatted = secret.replace(/\W+/g, '').toUpperCase();
 
     try {
@@ -172,9 +173,9 @@ export default function List({ contract, account, hashKey }) {
       setMintError('2-Step verification secret is wrong')
       return;
     }
-
+    console.log(1)
     const encrypted = encrypt(hashKey, formatted)
-
+    console.log(2)
     try {
       mintCheckerStart();
       setStatusMessage('Transaction is being processed on blockchain, please check your wallet');
@@ -185,14 +186,15 @@ export default function List({ contract, account, hashKey }) {
       document.getElementById('note-field').value = '';
       document.getElementById("mint-modal").checked = false;
 
-      const noteEncrypted = encrypt(hashKey,utoa(note))
-      // const bytes32 = ethers.utils.formatBytes32String(note)
-      // console.log(bytes32)
-      const mintStatus = await contract.getMintStatus();
-      console.log('mintStatus: ' + mintStatus);
+      console.log(3)
 
+      const noteEncrypted = encrypt(hashKey,utoa(note))
+
+      console.log(4)
       const transaction = await contract.mint(encrypted, noteEncrypted);
+      console.log(5)
       await transaction.wait();
+      console.log(6)
       setNote('');
 
     } catch (error) {
@@ -201,7 +203,7 @@ export default function List({ contract, account, hashKey }) {
       setStatusMessage('')
       let message = 'something wrong';
 
-      if (error.data !== undefined && error.data.message !== undefined) {
+      if (error && error.data !== undefined && error.data.message !== undefined) {
         message = error.data.message
         if (message.includes("insufficient funds for gas")) {
           message = 'Insufficient funds for gas'
@@ -499,7 +501,7 @@ export default function List({ contract, account, hashKey }) {
           <div className="flex flex-col w-full border-opacity-50 p-2">
             <div className="grid place-items-center">
               <button className="btn-3d text-gray-400 w-full" onClick={startVisualMode}>
-                <span className='text-base mx-2.5'>Start Visual Mode</span>
+                <span className='text-base mx-2.5'>Display setting</span>
               </button>
             </div>
           </div>
@@ -508,7 +510,7 @@ export default function List({ contract, account, hashKey }) {
           <div className="flex flex-col w-full border-opacity-50 p-2">
             <div className="grid place-items-center">
               <button className="btn-3d text-gray-400 w-full" onClick={closeVisualMode}>
-                <span className='text-base mx-2.5'>Close Visual Mode</span>
+                <span className='text-base mx-2.5'>Exit display setting</span>
               </button>
             </div>
           </div>

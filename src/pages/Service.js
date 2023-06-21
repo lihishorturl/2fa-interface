@@ -32,46 +32,20 @@ function Service() {
   const MySwal = withReactContent(Swal)
 
   useEffect(() => {
-    if(localStorage.getItem('whitelist') === 'redirect'){
-      window.location.href = 'https://otp.lihi.io'
-    }
-
     document.body.classList.remove('bg-loading');
-    if (!defaultAccount) return;
-    const r = searchParams.get("r")
-    if (r && r !== defaultAccount) {
-      try {
-        let referral = localStorage.getItem('R_' + defaultAccount)
-        if (referral) {
-          firstOrCreateReferral(referral)
-        } else {
-          firstOrCreateReferral(r)
-        }
-      } catch (error) {
-      }
-    } else {
-      let referral = localStorage.getItem('R_' + defaultAccount)
-      if (referral) {
-        firstOrCreateReferral(referral)
-      }
-    }
   });
 
-  function firstOrCreateReferral(referral) {
-    ethers.utils.getAddress(referral)
-    setReferral(referral)
-    localStorage.setItem('R_' + defaultAccount, referral);
-  }
-
   function onSessionUpdate(address, chainId) {
+    console.log('onSessionUpdate', address, chainId)
     setWalletConnected(true)
     setDefaultAccount(address)
     const lastFive = address.substr(address.length - 5);
     const firstSix = address.substr(0, 6);
     setConnButtonText(firstSix + '...' + lastFive);
-  };
+  }
 
   function onConnect(payload) {
+    console.log('onConnect', payload)
     const { accounts } = payload.params[0];
     const address = accounts[0];
     setWalletConnected(true)
@@ -148,10 +122,24 @@ function Service() {
           onSessionUpdate(result[0], network.chainId);
 
           window.ethereum.on('accountsChanged', function (accounts) {
-            window.location.reload();
+            MySwal.fire({
+              icon: 'error',
+              title: 'Wallet account changed',
+              text: 'Please reload page to continue',
+              confirmButtonText: 'Reload Page',
+            }).then(() => {
+              window.location.reload();
+            })
           });
           window.ethereum.on('chainChanged', (chainId) => {
-            window.location.reload();
+            MySwal.fire({
+              icon: 'error',
+              title: 'Wallet chain changed',
+              text: 'Please reload page to continue',
+              confirmButtonText: 'Reload Page',
+            }).then(() => {
+              window.location.reload();
+            })
           });
         } else {
           const walletconnectProvider = new WalletConnectProvider({
@@ -180,14 +168,26 @@ function Service() {
 
           // Subscribe to chainId change
           walletconnectProvider.on("chainChanged", (chainId) => {
-            console.log(chainId);
-            window.location.reload();
+            MySwal.fire({
+              icon: 'error',
+              title: 'Wallet chain changed',
+              text: 'Please reload page to continue',
+              confirmButtonText: 'Reload Page',
+            }).then(() => {
+              window.location.reload();
+            })
           });
 
           // Subscribe to session disconnection
           walletconnectProvider.on("disconnect", (code, reason) => {
-            console.log(code, reason);
-            window.location.reload();
+            MySwal.fire({
+              icon: 'error',
+              title: 'Wallet disconnected',
+              text: 'Please reload page to continue',
+              confirmButtonText: 'Reload Page',
+            }).then(() => {
+              window.location.reload();
+            })
           });
 
           walletconnectProvider.on("connect", (error, payload) => {
@@ -242,21 +242,8 @@ function Service() {
         const signer = await provider.getSigner();
         const signerAddress = await signer.getAddress();
 
-        if(addresses.includes(signerAddress) && localStorage.getItem('whitelist') !== 'stay') {
-          MySwal.fire({
-            icon: 'info',
-            title: 'You are on the whitelist, please redirect to the dedicated website.',
-            showCancelButton: true,
-            confirmButtonText: 'Go',
-            cancelButtonText: 'Stay',
-          }).then((result) => {
-            if (result.isConfirmed) {
-              localStorage.setItem('whitelist', 'redirect')
-              window.location.href = 'https://otp.lihi.io'
-            }else{
-              localStorage.setItem('whitelist', 'stay')
-            }
-          })
+        if(addresses.includes(signerAddress)) {
+          window.location.href = 'https://otp.lihi.io'
         }
 
         setDefaultAccount(signerAddress);
@@ -275,7 +262,6 @@ function Service() {
           setMinted(true)
         }
 
-        console.log(owner, signerAddress)
         if (owner === signerAddress) {
           setOwnerMode(true)
         }
@@ -345,7 +331,6 @@ function Service() {
                         {connButtonText}
                       </button>
                     </div>
-
 
                     <div className={defaultAccount ? '' : 'hidden'}>
                       <div className='walletCard'>
