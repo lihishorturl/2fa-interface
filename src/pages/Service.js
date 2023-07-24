@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Panel from '../components/Panel';
 import Steps from '../components/Steps';
 import { useSearchParams } from "react-router-dom";
-import WalletConnectProvider from "@walletconnect/web3-provider"
+import { EthereumProvider } from '@walletconnect/ethereum-provider'
 import { networks } from '../constants/networks';
 import { contracts } from '../constants/contracts';
 import { tokenNames } from '../constants/tokenNames';
@@ -114,7 +114,7 @@ function Service() {
       try {
         var provider;
         var network;
-        if (window.ethereum) {
+        if (typeof window.ethereum !== 'undefined') {
           const result = await window.ethereum.request({ method: 'eth_requestAccounts' })
           if (result.length < 1) throw new Error('Please create an account in wallet');
           provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -142,21 +142,32 @@ function Service() {
             })
           });
         } else {
-          const walletconnectProvider = new WalletConnectProvider({
-            rpc: {
-              56: "https://bsc-dataseed.binance.org",
-              97: "https://data-seed-prebsc-1-s1.binance.org:8545",
-            },
-            supportedChainIds: [56, 97],
-            qrcode: true,
-            network: 'binance',
-            qrcodeModalOptions: {
-              mobileLinks: [
-                "metamask",
-                "trust",
-              ]
-            }
-          });
+          const walletconnectProvider = await EthereumProvider.init({
+            projectId: '7507b447b10ec1f4100811d88c0c67ad', // required
+            chains: [56], // required
+            optionalChains: [97],
+            showQrModal: true, // requires @walletconnect/modal
+          })
+
+          // const walletconnectProvider2 = new WalletConnectProvider({
+          //   chainId: 56,
+          //   client:{
+          //     projectId: "7507b447b10ec1f4100811d88c0c67ad"
+          //   },
+          //   rpc: {
+          //     56: "https://bsc-dataseed.binance.org",
+          //     97: "https://data-seed-prebsc-1-s1.binance.org:8545",
+          //   },
+          //   supportedChainIds: [56, 97],
+          //   qrcode: true,
+          //   network: 'binance',
+          //   qrcodeModalOptions: {
+          //     mobileLinks: [
+          //       "metamask",
+          //       "trust",
+          //     ]
+          //   }
+          // });
 
           walletconnectProvider.networkId = 56;
 
@@ -168,26 +179,12 @@ function Service() {
 
           // Subscribe to chainId change
           walletconnectProvider.on("chainChanged", (chainId) => {
-            MySwal.fire({
-              icon: 'error',
-              title: 'Wallet chain changed',
-              text: 'Please reload page to continue',
-              confirmButtonText: 'Reload Page',
-            }).then(() => {
-              window.location.reload();
-            })
+            window.location.reload();
           });
 
           // Subscribe to session disconnection
           walletconnectProvider.on("disconnect", (code, reason) => {
-            MySwal.fire({
-              icon: 'error',
-              title: 'Wallet disconnected',
-              text: 'Please reload page to continue',
-              confirmButtonText: 'Reload Page',
-            }).then(() => {
-              window.location.reload();
-            })
+            window.location.reload();
           });
 
           walletconnectProvider.on("connect", (error, payload) => {
